@@ -149,4 +149,7 @@ COPY --from=pre-builder /app/.git_sha /app/.git_sha
 
 WORKDIR /app
 
+# Fix execute permissions for bin files (needed for Railway)
+RUN chmod +x bin/*
+
 EXPOSE 3000
