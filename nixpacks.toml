@@ -1,20 +1,17 @@
 # Nixpacks configuration for Railway deployment
-# This file configures how Railway builds your app using Nixpacks
+# https://nixpacks.com/docs/configuration/file
 
-# Provider detection
 providers = ["ruby"]
 
 [variables]
-# Force production environment during build
 RAILS_ENV = "production"
 NODE_ENV = "production"
 RACK_ENV = "production"
 RAILS_SERVE_STATIC_FILES = "true"
 RAILS_LOG_TO_STDOUT = "true"
-SECRET_KEY_BASE = "placeholder_secret_key_base_for_asset_precompilation"
+SECRET_KEY_BASE = "placeholder_secret_key_base_for_asset_precompilation_12345678901234567890"
 NODE_OPTIONS = "--max-old-space-size=4096"
 BUNDLE_WITHOUT = "development:test"
-BUNDLE_DEPLOYMENT = "true"
 
 [phases.setup]
 nixPkgs = ["postgresql", "imagemagick", "vips", "git", "openssl"]
@@ -22,15 +19,14 @@ nixPkgs = ["postgresql", "imagemagick", "vips", "git", "openssl"]
 [phases.install]
 dependsOn = ["setup"]
 cmds = [
-  # Create necessary directories FIRST
+  # Create ALL necessary directories FIRST - before anything else
   "mkdir -p log tmp/pids tmp/cache tmp/sockets storage",
-  "touch log/production.log",
+  "touch log/development.log log/production.log log/test.log",
   # Install Ruby dependencies
   "gem install bundler:2.5.11",
   "bundle config set --local without 'development test'",
-  "bundle config set --local deployment 'true'",
   "bundle install -j 4",
-  # Install Node dependencies
+  # Install Node dependencies  
   "corepack enable",
   "pnpm install --frozen-lockfile"
 ]
@@ -38,14 +34,12 @@ cmds = [
 [phases.build]
 dependsOn = ["install"]
 cmds = [
-  # Ensure log directory exists
-  "mkdir -p log",
-  "touch log/production.log",
-  # Precompile assets with production environment
-  "RAILS_ENV=production SECRET_KEY_BASE=placeholder_for_precompile bundle exec rake assets:precompile",
-  # Cleanup to reduce image size
-  "rm -rf node_modules/.cache tmp/cache"
+  # Ensure directories exist again (in case they were cleaned)
+  "mkdir -p log tmp",
+  "touch log/development.log log/production.log",
+  # Precompile assets with RAILS_ENV explicitly set
+  "RAILS_ENV=production RACK_ENV=production SECRET_KEY_BASE=placeholder_for_precompile bundle exec rake assets:precompile"
 ]
 
 [start]
-cmd = "bundle exec rails db:chatwoot_prepare && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"
+cmd = "mkdir -p log tmp && bundle exec rails db:chatwoot_prepare && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"

@@ -1,0 +1,32 @@
+#!/bin/bash
+# Custom build script for Railway deployment
+# This runs before the default Nixpacks build commands
+
+set -e
+
+echo "=== Railway Custom Build Script ==="
+
+# Create necessary directories
+echo "Creating log and tmp directories..."
+mkdir -p log tmp/pids tmp/cache tmp/sockets storage
+
+# Create log files
+touch log/development.log
+touch log/production.log
+touch log/test.log
+
+echo "Log directory contents:"
+ls -la log/
+
+# Set production environment
+export RAILS_ENV=production
+export NODE_ENV=production
+export RACK_ENV=production
+
+echo "Environment: RAILS_ENV=$RAILS_ENV"
+
+# Run asset precompilation with production environment
+echo "Precompiling assets..."
+SECRET_KEY_BASE=placeholder_for_precompile RAILS_ENV=production bundle exec rake assets:precompile
+
+echo "=== Build complete ==="
