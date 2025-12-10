@@ -1,0 +1,23 @@
+# Railway configuration for Chatwoot
+# https://docs.railway.app/reference/config-as-code
+
+[build]
+# Use the Dockerfile in root directory
+dockerfilePath = "Dockerfile"
+
+[build.args]
+RAILS_ENV = "production"
+NODE_OPTIONS = "--max-old-space-size=4096"
+
+[deploy]
+# Number of instances to deploy
+numReplicas = 1
+# Start command for web service
+startCommand = "bundle exec rails db:chatwoot_prepare && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"
+# Health check path
+healthcheckPath = "/api"
+# Timeout for health checks
+healthcheckTimeout = 300
+# Restart policy
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

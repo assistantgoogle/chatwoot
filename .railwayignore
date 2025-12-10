@@ -1,0 +1,43 @@
+# Files to ignore during Railway build
+# This speeds up the build process
+
+# Development files
+.git
+.github
+.circleci
+.devcontainer
+.vscode
+.windsurf
+.husky
+
+# Test files
+spec/
+test/
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Development configs
+.env.example
+docker-compose*.yaml
+Procfile.dev
+Procfile.test
+Procfile.tunnel
+
+# Misc
+.dockerignore
+.gitignore
+.rubocop.yml
+.scss-lint.yml
+.eslintrc.js
+.prettierrc
+.editorconfig
+crowdin.yml
+semantic.yml
+
+# Large unnecessary folders
+swagger/
+rubocop/
+deployment/
