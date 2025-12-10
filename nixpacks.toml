@@ -1,0 +1,51 @@
+# Nixpacks configuration for Railway deployment
+# This file configures how Railway builds your app using Nixpacks
+
+# Provider detection
+providers = ["ruby"]
+
+[variables]
+# Force production environment during build
+RAILS_ENV = "production"
+NODE_ENV = "production"
+RACK_ENV = "production"
+RAILS_SERVE_STATIC_FILES = "true"
+RAILS_LOG_TO_STDOUT = "true"
+SECRET_KEY_BASE = "placeholder_secret_key_base_for_asset_precompilation"
+NODE_OPTIONS = "--max-old-space-size=4096"
+BUNDLE_WITHOUT = "development:test"
+BUNDLE_DEPLOYMENT = "true"
+
+[phases.setup]
+nixPkgs = ["postgresql", "imagemagick", "vips", "git", "openssl"]
+
+[phases.install]
+dependsOn = ["setup"]
+cmds = [
+  # Create necessary directories FIRST
+  "mkdir -p log tmp/pids tmp/cache tmp/sockets storage",
+  "touch log/production.log",
+  # Install Ruby dependencies
+  "gem install bundler:2.5.11",
+  "bundle config set --local without 'development test'",
+  "bundle config set --local deployment 'true'",
+  "bundle install -j 4",
+  # Install Node dependencies
+  "corepack enable",
+  "pnpm install --frozen-lockfile"
+]
+
+[phases.build]
+dependsOn = ["install"]
+cmds = [
+  # Ensure log directory exists
+  "mkdir -p log",
+  "touch log/production.log",
+  # Precompile assets with production environment
+  "RAILS_ENV=production SECRET_KEY_BASE=placeholder_for_precompile bundle exec rake assets:precompile",
+  # Cleanup to reduce image size
+  "rm -rf node_modules/.cache tmp/cache"
+]
+
+[start]
+cmd = "bundle exec rails db:chatwoot_prepare && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"

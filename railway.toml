@@ -2,12 +2,15 @@
 # https://docs.railway.app/reference/config-as-code
 
 [build]
-# Use the Dockerfile in root directory
+# Force using Dockerfile (not Nixpacks)
+builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [build.args]
 RAILS_ENV = "production"
+NODE_ENV = "production"
 NODE_OPTIONS = "--max-old-space-size=4096"
+RAILS_SERVE_STATIC_FILES = "true"
 
 [deploy]
 # Number of instances to deploy
