@@ -16,7 +16,7 @@ RAILS_SERVE_STATIC_FILES = "true"
 # Number of instances to deploy
 numReplicas = 1
 # Start command for web service (db:chatwoot_prepare runs in pre-deploy)
-startCommand = "bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"
+startCommand = "bundle exec rails server -b 0.0.0.0 -p $PORT"
 # Restart policy
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
