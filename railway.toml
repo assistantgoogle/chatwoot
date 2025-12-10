@@ -4,7 +4,7 @@
 [build]
 # Force using Dockerfile (not Nixpacks)
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "docker/Dockerfile"
 
 [build.args]
 RAILS_ENV = "production"
@@ -17,10 +17,6 @@ RAILS_SERVE_STATIC_FILES = "true"
 numReplicas = 1
 # Start command for web service
 startCommand = "bundle exec rails db:chatwoot_prepare && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"
-# Health check path
-healthcheckPath = "/api"
-# Timeout for health checks
-healthcheckTimeout = 300
 # Restart policy
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
