@@ -79,10 +79,18 @@ Rails.application.configure do
 
   # Use a different logger for distributed setups.
   # require 'syslog/logger'
-  # Ensure log directory exists (fixes Railway/Nixpacks builds)
-  log_dir = Rails.root.join('log')
-  FileUtils.mkdir_p(log_dir) unless File.directory?(log_dir)
-  config.logger = ActiveSupport::Logger.new(log_dir.join("#{Rails.env}.log"), 1, ENV.fetch('LOG_SIZE', '1024').to_i.megabytes)
+  # Use STDOUT logging for containerized environments (Railway, Docker, etc.)
+  # This avoids issues with missing log directories during build
+  if ENV['RAILS_LOG_TO_STDOUT'].present? || ENV['RAILWAY_ENVIRONMENT'].present? || ENV['DOCKER'].present?
+    logger = ActiveSupport::Logger.new($stdout)
+    logger.formatter = config.log_formatter
+    config.logger = ActiveSupport::TaggedLogging.new(logger)
+  else
+    # Local development - use file logging
+    log_dir = Rails.root.join('log')
+    FileUtils.mkdir_p(log_dir) unless File.directory?(log_dir)
+    config.logger = ActiveSupport::Logger.new(log_dir.join("#{Rails.env}.log"), 1, ENV.fetch('LOG_SIZE', '1024').to_i.megabytes)
+  end
 
   # Bullet configuration to fix the N+1 queries
   config.after_initialize do
